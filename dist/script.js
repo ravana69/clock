@@ -1,108 +1,58 @@
 "use strict";
-
-// Import necessary modules
-const React = require("react");
-const ReactDOM = require("react-dom");
-const moment = require("moment-timezone"); // Import moment-timezone library
-
-// TimerChar Component
 const TimerChar = (props) => {
     const ref = React.useRef(null);
     const colon = props.char === ":";
-    
     if (colon) {
-        return (
-            <h1 className="timer-char colon">:</h1>
-        );
+        return (React.createElement("h1", { className: "timer-char colon" }, ":"));
     }
-    
     const number = parseInt(props.char);
-    
     const getCharSlider = () => {
         let options = [];
         for (let i = 0; i <= 9; i++) {
             const classes = classNames("timer-char-slider-option", {
                 active: number === i
             });
-            options.push(<span key={i} className={classes}>{i}</span>);
+            options.push(React.createElement("span", { key: i, className: classes }, i));
         }
-        
-        const height = ref.current ? ref.current.offsetHeight : 0;
-        const top = `${number * height * -1}px`;
-        
-        return (
-            <div className="timer-char-slider" style={{ top }}>
-                {options}
-            </div>
-        );
+        const height = ref.current ? ref.current.offsetHeight : 0, top = `${number * height * -1}px`;
+        return (React.createElement("div", { className: "timer-char-slider", style: { top } }, options));
     };
-    
-    return (
-        <div ref={ref} className="timer-char number">
-            {getCharSlider()}
-        </div>
-    );
+    return (React.createElement("div", { ref: ref, className: "timer-char number" }, getCharSlider()));
 };
-
-// Timer Component
 const Timer = () => {
-    const [date, setDateTo] = React.useState(moment.tz("Asia/Kolkata")); // Set initial time to IST
-
+    const [date, setDateTo] = React.useState(new Date());
     React.useEffect(() => {
         const interval = setInterval(() => {
-            const istTime = moment.tz("Asia/Kolkata");
-            
-            if (istTime.seconds() !== date.seconds()) {
-                setDateTo(istTime);
+            const update = new Date();
+            if (update.getSeconds() !== date.getSeconds()) {
+                setDateTo(update);
             }
-        }, 1000); // Update every second
-        
+        }, 100);
         return () => {
             clearInterval(interval);
         };
     }, [date]);
-
     const formatSegment = (segment) => {
         return segment < 10 ? `0${segment}` : segment;
     };
-
     const getHours = (hours) => {
         return hours % 12 === 0 ? 12 : hours % 12;
     };
-
     const getTime = () => {
-        const hours = getHours(date.hours());
-        const minutes = date.minutes();
-        const seconds = date.seconds();
-        
+        const hours = getHours(date.getHours()), minutes = date.getMinutes(), seconds = date.getSeconds();
         return `${formatSegment(hours)}:${formatSegment(minutes)}:${formatSegment(seconds)}`;
     };
-
     const getChars = () => {
-        return getTime().split("").map((char, index) => (
-            <TimerChar key={index} char={char} />
-        ));
+        return getTime().split("").map((char, index) => (React.createElement(TimerChar, { key: index, char: char })));
     };
-
-    return (
-        <div id="timer">
-            <div id="timer-text">{getChars()}</div>
-        </div>
-    );
+    return (React.createElement("div", { id: "timer" },
+        React.createElement("div", { id: "timer-text" }, getChars())));
 };
-
-// App Component
 const App = () => {
-    return (
-        <div id="app">
-            <Timer />
-            <a id="youtube-link" href="" target="_blank">
-                <i className="fa-brands fa-youtube" />
-                <h1 />
-            </a>
-        </div>
-    );
+    return (React.createElement("div", { id: "app" },
+        React.createElement(Timer, null),
+        React.createElement("a", { id: "youtube-link", href: "", target: "_blank" },
+            React.createElement("i", { className: "fa-brands fa-youtube" }),
+            React.createElement("h1", null, ""))));
 };
-
-// Render the App component
-ReactDOM.render(<App />, document.getElementById("root"));
+ReactDOM.render(React.createElement(App, null), document.getElementById("root"));
